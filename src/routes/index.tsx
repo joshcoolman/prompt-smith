@@ -1,10 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { appMeta } from '#/app-meta'
-import { StatusLanding } from '#/components/status-landing'
+import { Home } from '#/components/home'
 
 export const Route = createFileRoute('/')({ component: Home })
-
-function Home() {
-  return <StatusLanding meta={appMeta} />
-}

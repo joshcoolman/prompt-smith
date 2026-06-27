@@ -1,0 +1,41 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   base.css — base element styling (html / body).
+
+   Deliberately minimal. NOTE: there is no `* { margin:0; padding:0 }` reset —
+   Tailwind v4's Preflight already does that inside `@layer base`. An UNLAYERED
+   copy here would override every margin/padding utility (mx-auto, px-*, pt-*, …)
+   because unlayered CSS beats any @layer, so it must not exist.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+html {
+  background: var(--bg);
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  animation: quickFadeIn var(--dur-base) var(--ease);
+}
+
+@keyframes quickFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+}
