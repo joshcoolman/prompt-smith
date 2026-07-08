@@ -32,9 +32,16 @@ Nothing functional yet — just the rails.
 
 **What to build:**
 
-1. Provision via `railway mcp install` + agent-driven setup: an app
-   service, a private-network Postgres (no public port), and an
-   attachment volume.
+1. ✅ Provisioned via the Railway MCP + agent-driven setup: project
+   `prompt-smith`, an app service (deploys from GitHub `main`, public
+   domain https://prompt-smith-production.up.railway.app), a
+   private-network Postgres (no public port) with a volume mounted at
+   `/var/lib/postgresql/data`, and `DATABASE_URL` wired from Postgres to
+   the app service via reference variable. Fixed two deploy bugs found
+   along the way: missing `package.json` `start` script (Railpack fell
+   back to static-only serving instead of running the SSR server) and
+   `vite preview`'s default host allowlist blocking the Railway domain
+   (`vite.config.ts` `preview.allowedHosts`).
 2. Drizzle schema: `projects`, `personas` (versioned), `saved_inputs`
    (+ attachments), `runs`.
 3. Confirm the app connects to Postgres locally through `railway dev` and
