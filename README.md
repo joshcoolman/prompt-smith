@@ -45,8 +45,15 @@ Full detail: [`docs/VISION.md`](docs/VISION.md).
 
 ## Local development
 
+Railway's Postgres is private-network-only (no public port), so it isn't
+reachable from a laptop — local dev needs its own disposable Postgres
+(`docker-compose.yml`). See `gotchas/local-postgres-for-dev.md`.
+
 ```bash
 pnpm install
+docker compose up -d   # local Postgres — make sure .env.local's DATABASE_URL
+                        # matches (postgresql://user:devpassword@localhost:5432/prompt_smith)
+node --env-file=.env.local scripts/migrate.mjs   # first time only
 pnpm dev      # http://localhost:3002
 pnpm build    # production build
 pnpm test     # vitest
@@ -55,19 +62,21 @@ pnpm lint
 
 ## Status
 
-**Last shipped:** Effect AI provider layer (`docs/PLAN.md` Phase 2). A real
-POST endpoint (`src/routes/api/run.ts`) takes persona + input + model choice
-and returns raw output from Anthropic via `@effect/ai`/`@effect/ai-anthropic`
-(`src/features/ai/`). Gated by a Supabase bearer token — the server-side
-counterpart to the Phase 1.5 browser auth gate, since this is a
-cost-incurring endpoint. Proved end-to-end against the live Anthropic API:
-a text completion, a real multimodal (image) call, and the auth gate's
-failure paths (missing/invalid bearer token, both verified against the live
-Supabase project — the success path needs real sign-in credentials, not
-tested here). `ANTHROPIC_API_KEY` is in `.env.local` and Railway env vars
-(Josh added both directly). No UI yet — that's Phase 3.
+**Last shipped:** Core UI (`docs/PLAN.md` Phase 3) — the full loop now works
+in the browser. `/` lists Projects (create/delete); `/projects/$projectId`
+is one workspace page with Personas, Saved Inputs (both versioned — every
+edit inserts a new version, never overwrites), and a Run panel that picks a
+persona version × saved input version × model and calls Anthropic via a new
+`createServerFn` (`src/features/runs/`, `src/features/projects/`) — a
+second, simpler in-app path alongside the bearer-gated `/api/run` from
+Phase 2, both calling the same `runAnthropicCompletion`. Verified live in
+the browser: created a project/persona/saved input, ran it for real output,
+edited the persona to a v2, and confirmed picking v1 vs v2 in the Run panel
+changes the actual model output. Saved Inputs are text-only this phase —
+attachment upload is a deliberate fast-follow, not done here. Local
+verification needed its own Postgres (Railway's is private-network-only);
+added `docker-compose.yml` and `gotchas/local-postgres-for-dev.md` so a
+future session doesn't hit the same wall.
 
-**Up next:** `docs/PLAN.md` Phase 3 — Core UI: Projects, Personas, Saved
-Inputs (CRUD) and a single-run screen (persona × input × model → raw
-output) wired to the `/api/run` endpoint or a server function wrapping the
-same `runAnthropicCompletion` call.
+**Up next:** `docs/PLAN.md` Phase 4 — side-by-side comparison: the same
+input run across multiple models and/or persona versions in parallel.
