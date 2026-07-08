@@ -76,7 +76,22 @@ changes the actual model output. Saved Inputs are text-only this phase —
 attachment upload is a deliberate fast-follow, not done here. Local
 verification needed its own Postgres (Railway's is private-network-only);
 added `docker-compose.yml` and `gotchas/local-postgres-for-dev.md` so a
-future session doesn't hit the same wall.
+future session doesn't hit the same wall. Run output now renders as
+markdown (`react-markdown`), and the workspace layout is a left sidebar
+(controls: Personas, Saved Inputs, Run form) + right column (output/History).
+
+**Deploy status:** Production on Railway (`prompt-smith-production.up.railway.app`)
+is caught up with all of the above as of this session — confirmed via a
+real deploy, not just a merge. Along the way, found and fixed a real build
+break: `msgpackr-extract` (pulled in transitively by Phase 2's
+`@effect/platform`) needed a pnpm build-script approval
+(`pnpm-workspace.yaml`'s `allowBuilds`) — see
+`gotchas/pnpm-install-approvals.md`. Auto-deploy is **on**, watching
+`main` — safe here because this repo's workflow is exclusively
+branch → PR → merge, so every push to `main` is already a completed,
+reviewed milestone.
 
 **Up next:** `docs/PLAN.md` Phase 4 — side-by-side comparison: the same
 input run across multiple models and/or persona versions in parallel.
+Also outstanding: attachment upload (image/PDF Saved Inputs), scoped out
+of Phase 3.
