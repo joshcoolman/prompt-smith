@@ -1,7 +1,6 @@
+# pnpm 11 reads build-script approvals from allowBuilds (onlyBuiltDependencies
+# was removed in v11 and is silently ignored if used here).
 allowBuilds:
   unrs-resolver: true
-# pnpm 11 reads build-script approvals from here (no longer from package.json).
-# esbuild + lightningcss ship native binaries that must be built on install.
-onlyBuiltDependencies:
-  - esbuild
-  - lightningcss
+  esbuild: true
+  lightningcss: true
