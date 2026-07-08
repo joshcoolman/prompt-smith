@@ -7,6 +7,8 @@ import {
 } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 import { getAuthClient, useAuth } from '#/features/auth'
 import {
@@ -70,8 +72,8 @@ function ProjectWorkspace() {
   }
 
   return (
-    <main className="bg-bg text-text min-h-screen px-6 py-12">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-10">
+    <main className="bg-bg text-text flex min-h-screen flex-col lg:flex-row">
+      <aside className="border-border bg-surface flex w-full flex-col gap-8 border-b px-6 py-10 lg:h-screen lg:w-1/4 lg:min-w-[320px] lg:overflow-y-auto lg:border-r lg:border-b-0">
         <header>
           <Link to="/" className={secondaryButtonClass}>
             ← projects
@@ -91,13 +93,16 @@ function ProjectWorkspace() {
           onChange={invalidate}
         />
 
-        <RunPanel
+        <RunControls
           projectId={detail.project.id}
           personas={detail.personas}
           savedInputs={detail.savedInputs}
-          runs={runs}
           onChange={invalidate}
         />
+      </aside>
+
+      <div className="flex-1 px-6 py-10 lg:h-screen lg:overflow-y-auto lg:px-10">
+        <RunHistory runs={runs} />
       </div>
     </main>
   )
@@ -435,17 +440,15 @@ function SavedInputPanel({
 // Run
 // ─────────────────────────────────────────────────────────────────────────
 
-function RunPanel({
+function RunControls({
   projectId,
   personas,
   savedInputs,
-  runs,
   onChange,
 }: {
   projectId: string
   personas: Persona[]
   savedInputs: SavedInput[]
-  runs: Run[]
   onChange: () => Promise<void>
 }) {
   const personaVersionOptions = useMemo(
@@ -523,46 +526,44 @@ function RunPanel({
         </p>
       ) : (
         <div className="border-border bg-surface flex flex-col gap-3 rounded-md border p-4">
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <select
-              value={personaVersionId}
-              onChange={(e) => setPersonaVersionId(e.target.value)}
-              className={inputClass}
-            >
-              {personaVersionOptions.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <select
-              value={savedInputVersionId}
-              onChange={(e) => setSavedInputVersionId(e.target.value)}
-              className={inputClass}
-            >
-              {savedInputVersionOptions.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className={inputClass}
-            >
-              {MODELS.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={personaVersionId}
+            onChange={(e) => setPersonaVersionId(e.target.value)}
+            className={inputClass}
+          >
+            {personaVersionOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={savedInputVersionId}
+            onChange={(e) => setSavedInputVersionId(e.target.value)}
+            className={inputClass}
+          >
+            {savedInputVersionOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            className={inputClass}
+          >
+            {MODELS.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
+          </select>
           <button
             type="button"
             disabled={running}
             onClick={() => void handleRun()}
-            className={`${primaryButtonClass} self-start`}
+            className={primaryButtonClass}
           >
             {running ? 'Running…' : 'Run'}
           </button>
@@ -573,12 +574,22 @@ function RunPanel({
           )}
         </div>
       )}
+    </section>
+  )
+}
 
-      <h3 className="text-text-muted mt-4 text-sm font-medium">History</h3>
+// ─────────────────────────────────────────────────────────────────────────
+// Run history
+// ─────────────────────────────────────────────────────────────────────────
+
+function RunHistory({ runs }: { runs: Run[] }) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-text font-medium">History</h2>
       {runs.length === 0 ? (
         <p className="text-text-muted text-sm">No runs yet.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-4">
           {runs.map((run) => (
             <li
               key={run.id}
@@ -593,9 +604,11 @@ function RunPanel({
               {run.status === 'error' ? (
                 <p className="text-accent mt-2 text-sm">{run.errorMessage}</p>
               ) : (
-                <p className="text-text mt-2 whitespace-pre-wrap text-sm">
-                  {run.output}
-                </p>
+                <div className="prose compact mt-2">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {run.output}
+                  </ReactMarkdown>
+                </div>
               )}
             </li>
           ))}
