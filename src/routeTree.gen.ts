@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiRunRouteImport } from './routes/api/run'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -28,35 +29,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRunRoute = ApiRunRouteImport.update({
+  id: '/api/run',
+  path: '/api/run',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/docs': typeof DocsRoute
   '/login': typeof LoginRoute
+  '/api/run': typeof ApiRunRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/docs': typeof DocsRoute
   '/login': typeof LoginRoute
+  '/api/run': typeof ApiRunRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/docs': typeof DocsRoute
   '/login': typeof LoginRoute
+  '/api/run': typeof ApiRunRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/docs' | '/login'
+  fullPaths: '/' | '/docs' | '/login' | '/api/run'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/docs' | '/login'
-  id: '__root__' | '/' | '/docs' | '/login'
+  to: '/' | '/docs' | '/login' | '/api/run'
+  id: '__root__' | '/' | '/docs' | '/login' | '/api/run'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DocsRoute: typeof DocsRoute
   LoginRoute: typeof LoginRoute
+  ApiRunRoute: typeof ApiRunRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/run': {
+      id: '/api/run'
+      path: '/api/run'
+      fullPath: '/api/run'
+      preLoaderRoute: typeof ApiRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DocsRoute: DocsRoute,
   LoginRoute: LoginRoute,
+  ApiRunRoute: ApiRunRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
