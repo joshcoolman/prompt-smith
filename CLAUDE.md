@@ -4,8 +4,15 @@ This repo wants clean, milestone-based history: **branch → PR → merge**,
 not direct pushes to `main`. This overrides the global `~/.claude/CLAUDE.md`
 solo-dev "direct push" default for this repo specifically. One unit of
 work = one branch = one PR, merged when the unit is done (e.g. "Railway
-infra," "Drizzle schema"). Use `gh pr create` to open the PR; confirm with
-Josh before merging.
+infra," "Drizzle schema"). Use `gh pr create` / `gh pr merge --delete-branch`.
+
+Josh has explicitly authorized merging your own PRs without waiting for
+his review (2026-07-08) — he's directing at a distance and wants Claude
+to own the branch → PR → merge cycle end to end. Merge once the milestone
+is done and checks (build, tests) pass. Exception: pause and ask first if
+something about the PR gives genuine pause (failing build, a change that
+touches infra/secrets/destructive migrations, or anything outside the
+scope of what was asked) — routine milestone work doesn't need a check-in.
 
 # prompt-smith — working notes for Claude
 
