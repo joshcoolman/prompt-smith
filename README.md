@@ -2,7 +2,7 @@
 
 > A prompt (or system prompt) plus a complaint in, an improved version out — it fixes exactly what you flag.
 
-**Status: planned** — scaffolded and runnable, but development begins after [palette-forge](https://github.com/joshcoolman/palette-forge) ships. One shipped tile beats three planned ones. Built in public; this repo holds the shape while the flagship proves the pattern.
+**Status: planned, direction pivoted (2026-07-03)** — see [`docs/PIVOT.md`](docs/PIVOT.md) for the current design. The "complaint-driven prompt fixer" description below is the superseded framing, kept as history rather than deleted.
 
 ---
 

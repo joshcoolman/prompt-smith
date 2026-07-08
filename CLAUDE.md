@@ -1,11 +1,8 @@
 # prompt-smith — working notes for Claude
 
-**Read first:** [`docs/PLAN.md`](docs/PLAN.md) (the concrete, decided build
-plan — the _how_ and the build order). Then [`docs/SPEC.md`](docs/SPEC.md) (the
-_what/why_ sketch) and [`docs/OVERVIEW.md`](docs/OVERVIEW.md) (the umbrella
-vision). All docs are viewable in-app at `/docs`.
+**Read first:** [`docs/PIVOT.md`](docs/PIVOT.md) — 2026-07-03 direction change, current authority. It supersedes the "Hold the line" section below and the framing in `docs/SPEC.md` / `docs/OVERVIEW.md`, which are kept as history, not deleted. Reconcile before resuming work here.
 
-## The boundary (welded)
+## Hold the line (superseded — see PIVOT.md)
 
 - **The boundary is welded.** Prompt + complaint in → improved prompt out. Not a prompt library, chat playground, or benchmark suite. Retune _what good prompt-craft means_ via `/knowledge` only.
 - **Mechanism vs knowledge.** The improve→verify→revise loop is mechanism (code). What "good" means lives in `/knowledge`: `prompt-craft.md`, `anti-patterns.md` (a living blocklist), `rubric.md`.
