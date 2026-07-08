@@ -1,3 +1,13 @@
+## Git workflow — milestone PRs (overrides global no-PR default)
+
+This repo wants clean, milestone-based history: **branch → PR → merge**,
+not direct pushes to `main`. This overrides the global `~/.claude/CLAUDE.md`
+solo-dev "direct push" default for this repo specifically. One unit of
+work = one branch = one PR, merged when the unit is done (e.g. "Railway
+infra," "Drizzle schema"). Use `gh pr create` / `gh pr merge --delete-branch`.
+Still no need to ask before merging your own PRs — just do the branch → PR
+→ merge cycle per milestone.
+
 # prompt-smith — working notes for Claude
 
 **Read first:** [`docs/VISION.md`](docs/VISION.md) — 2026-07-07 direction change, current authority. It supersedes `docs/PIVOT.md` (2026-07-03), which in turn supersedes the "Hold the line" section below and the framing in `docs/SPEC.md` / `docs/OVERVIEW.md`. The full chain is kept as history, not deleted. Reconcile before resuming work here.
