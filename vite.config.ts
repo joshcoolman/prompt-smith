@@ -9,6 +9,7 @@ import tailwindcss from '@tailwindcss/vite'
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
+  preview: { allowedHosts: ['prompt-smith-production.up.railway.app'] },
 })
 
 export default config
