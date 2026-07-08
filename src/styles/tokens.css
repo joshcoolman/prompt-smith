@@ -14,18 +14,23 @@
      Near-absent color: warm greige paper, soft near-black ink, one muted clay
      accent. [data-theme='light'] below restates these so a nested light frame
      wins over a dark ancestor. */
-  --bg: #e9e6df;            /* warm off-white paper ground */
-  --surface: #f1efe8;       /* cards / panels — a touch lighter than paper */
+  --bg: #e9e6df; /* warm off-white paper ground */
+  --surface: #f1efe8; /* cards / panels — a touch lighter than paper */
   --surface-raised: #f7f5ef; /* raised ivory (never pure white) */
-  --surface-sunken: rgba(26, 22, 16, 0.045); /* recessed wells — faint ink wash */
-  --text: #1a1a18;          /* soft near-black ink (never pure black) */
-  --text-body: #26241f;     /* long-form body copy — warm ink */
-  --text-muted: #6a655b;    /* secondary / meta */
-  --text-faint: #938d81;    /* tertiary / decoration */
-  --border: #c7c1b4;        /* hairline content rules / dividers */
+  --surface-sunken: rgba(
+    26,
+    22,
+    16,
+    0.045
+  ); /* recessed wells — faint ink wash */
+  --text: #1a1a18; /* soft near-black ink (never pure black) */
+  --text-body: #26241f; /* long-form body copy — warm ink */
+  --text-muted: #6a655b; /* secondary / meta */
+  --text-faint: #938d81; /* tertiary / decoration */
+  --border: #c7c1b4; /* hairline content rules / dividers */
   --border-soft: rgba(26, 22, 16, 0.13);
   --border-faint: rgba(26, 22, 16, 0.07);
-  --accent: #8f523a;        /* THE accent — muted clay (links + the live edge) */
+  --accent: #8f523a; /* THE accent — muted clay (links + the live edge) */
   --accent-contrast: #f7f5ef; /* ink on an accent fill */
   --accent-soft: rgba(143, 82, 58, 0.12); /* accent borders / tints */
 

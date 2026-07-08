@@ -18,11 +18,36 @@ the `/docs` viewer, the feature seams, and the knowledge files are all in place.
 Nothing functional yet — just the rails.
 
 **What's in place:**
-- Shell: `src/components/home.tsx`, `/docs` viewer at `src/routes/docs.tsx`
+
+- Shell: `/docs` viewer at `src/routes/docs.tsx`
 - Style system: `src/styles/` (tokens, base, typography, index), theme toggle
 - Feature seams: `src/features/` — `improve`, `generate`, `verify`, `knowledge`, `prefs`
 - Knowledge: `knowledge/prompt-craft.md`, `anti-patterns.md`, `rubric.md`
 - Docs: `OVERVIEW.md`, `SPEC.md`, `PLAN.md`, `STYLE.md`
+
+---
+
+## Phase 1.5 — Auth (complete)
+
+Single-user email/password sign-in gating the whole app (`/`) behind a
+vendor-agnostic seam, Supabase as the first adapter. Sequenced ahead of
+Phase 2 since that phase wires in server-side API keys, and the app was
+public with zero auth gate until this shipped.
+
+1. The feature's boundary doc and `types.ts` (the `AuthClient` contract)
+   first.
+2. Implement behind the feature's public `index.ts`: a lazy env-tolerant
+   Supabase adapter, an in-memory mock adapter, a React provider + `useAuth`.
+3. Test the contract via the mock adapter — no network, green without env
+   vars (CI has none).
+4. Gate `/` itself (not a separate `/dashboard` — the whole app is the
+   protected surface); mount the provider at the root. `/docs` stays public.
+5. `scripts/setup.mjs` (`pnpm setup:supabase`) — the user runs it: link or
+   create the hosted Supabase project, write `.env.local`, provision the
+   single user via the admin API. No signup UI exists.
+
+After this phase: visiting `/` signed-out redirects to `/login`; signing in
+lands back where you were headed; a hard reload stays signed in.
 
 ---
 

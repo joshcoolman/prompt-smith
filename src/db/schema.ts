@@ -133,16 +133,13 @@ export const personaVersionsRelations = relations(
   }),
 )
 
-export const savedInputsRelations = relations(
-  savedInputs,
-  ({ one, many }) => ({
-    project: one(projects, {
-      fields: [savedInputs.projectId],
-      references: [projects.id],
-    }),
-    versions: many(savedInputVersions),
+export const savedInputsRelations = relations(savedInputs, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [savedInputs.projectId],
+    references: [projects.id],
   }),
-)
+  versions: many(savedInputVersions),
+}))
 
 export const savedInputVersionsRelations = relations(
   savedInputVersions,
