@@ -55,32 +55,19 @@ pnpm lint
 
 ## Status
 
-**Last shipped:** Auth (`docs/PLAN.md` Phase 1.5), via the `bootstrap:add-auth`
-skill. Single shared-credential Supabase gate — `/` is now the protected
-dashboard (redirects signed-out visitors to `/login?redirect=…` and back);
-`/docs` stays public. Vendor-agnostic `AuthClient` seam in
-`src/features/auth/` (Supabase is the only adapter; a mock adapter proves the
-contract in tests with zero env vars). Confirmed live in production on
-Railway (env vars pushed, redeployed, signed in successfully) — not just
-locally.
+**Last shipped:** Effect AI provider layer (`docs/PLAN.md` Phase 2). A real
+POST endpoint (`src/routes/api/run.ts`) takes persona + input + model choice
+and returns raw output from Anthropic via `@effect/ai`/`@effect/ai-anthropic`
+(`src/features/ai/`). Gated by a Supabase bearer token — the server-side
+counterpart to the Phase 1.5 browser auth gate, since this is a
+cost-incurring endpoint. Proved end-to-end against the live Anthropic API:
+a text completion, a real multimodal (image) call, and the auth gate's
+failure paths (missing/invalid bearer token, both verified against the live
+Supabase project — the success path needs real sign-in credentials, not
+tested here). `ANTHROPIC_API_KEY` is in `.env.local` and Railway env vars
+(Josh added both directly). No UI yet — that's Phase 3.
 
-Also resolved: the Railway build blocker from `pnpm-workspace.yaml`'s dead
-`onlyBuiltDependencies` key (pnpm v11 renamed it `allowBuilds`), and
-automatic DB migrations via Railway's Pre-Deploy Command
-(`pnpm db:migrate:deploy`, confirmed running before every deploy). Full
-detail in `gotchas/`.
-
-**Up next:** `docs/PLAN.md` Phase 2 — the Effect AI provider layer (a backend
-endpoint: persona + input + model choice → raw output, provable via
-curl/script, no UI yet). Two decisions already settled, ready for a fresh
-session to build against without re-litigating:
-
-- **API keys live in Railway env vars** (e.g. `ANTHROPIC_API_KEY`), same
-  pattern as the Supabase keys — not a settings table. Revisit only if a
-  real need for in-app key rotation shows up.
-- **Anthropic is the first provider** (`@effect/ai-anthropic`) — prove one
-  real multimodal call end-to-end before adding a second adapter.
-
-Not yet researched: `@effect/ai`'s current API surface (the Effect
-ecosystem moves fast — verify against real docs, not memory, before
-writing the provider layer).
+**Up next:** `docs/PLAN.md` Phase 3 — Core UI: Projects, Personas, Saved
+Inputs (CRUD) and a single-run screen (persona × input × model → raw
+output) wired to the `/api/run` endpoint or a server function wrapping the
+same `runAnthropicCompletion` call.

@@ -72,18 +72,30 @@ lands back where you were headed; a hard reload stays signed in.
 3. Confirm the app connects to Postgres locally through `railway dev` and
    that migrations run cleanly.
 
-## Phase 2 — Effect AI provider layer
+## Phase 2 — Effect AI provider layer (complete)
 
 **Output:** One working run, callable outside the UI (script/curl).
 
-**What to build:**
+**What was built:**
 
-1. Install `effect`, `@effect/ai`, `@effect/ai-anthropic`,
-   `@effect/ai-openai`, `@effect/schema`, `@effect/platform-node`.
-2. A backend endpoint: persona + input (text/image/PDF) + model choice →
-   raw output.
-3. Prove one real multimodal call end-to-end. API keys stay server-side
-   only — never in browser storage.
+1. Installed `effect`, `@effect/platform` (for `FetchHttpClient` — lighter
+   than `@effect/platform-node`, which drags in `@effect/sql`/`@effect/cluster`
+   peers unused here), `@effect/ai`, `@effect/ai-anthropic`. `@effect/schema`
+   wasn't needed — `Schema` now lives in `effect` core. `@effect/ai-openai`
+   deferred until a second provider is actually added.
+2. `src/features/ai/` — the provider-agnostic `RunInput`/`RunOutput`
+   contract (`types.ts`) and the one file that knows `@effect/ai-anthropic`
+   (`anthropic-provider.ts`, server-only).
+3. `src/routes/api/run.ts` — a real POST endpoint (TanStack Start server
+   route), gated by a Supabase bearer token (the server-side counterpart to
+   the Phase 1.5 browser auth gate — this is a cost-incurring endpoint, not
+   safe to leave open once deployed).
+4. Proved end-to-end against the real Anthropic API: a text completion, an
+   image-description multimodal call (a real PNG, not a synthetic pixel —
+   Anthropic rejected a 1x1 test image), and the auth gate itself (missing
+   token → 401, invalid token → 401 verified against the live Supabase
+   project). One gotcha found: `Prompt.FilePart.data` as a string is passed
+   to Anthropic as-is — raw base64 only, a `data:` URL prefix breaks it.
 
 ## Phase 3 — Core UI: Projects, Personas, Inputs, single Run
 
