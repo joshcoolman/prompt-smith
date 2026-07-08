@@ -55,8 +55,15 @@ pnpm lint
 
 ## Status
 
-**Last shipped:** Phase 0 runnable shell (rails, style system, `/docs`
-viewer) + this doc re-envisioning (`docs/VISION.md` and the supersession
-chain through `docs/PIVOT.md`, `CLAUDE.md`, `docs/PLAN.md`).
+**Last shipped:** Railway project provisioned end-to-end via the Railway
+MCP — Postgres (private-network only, no public port, volume-backed) and
+an app service deployed straight from GitHub `main`, live at
+https://prompt-smith-production.up.railway.app. Along the way, fixed two
+real deploy bugs: a missing `start` script (Railpack was silently falling
+back to serving `dist/client` as static files instead of running the SSR
+server) and `vite preview`'s default host allowlist blocking Railway's
+domain.
 
-**Up next:** `docs/PLAN.md` Phase 1 — Railway + Postgres + Drizzle infra.
+**Up next:** `docs/PLAN.md` Phase 1 — Drizzle schema (`projects`,
+`personas`, `saved_inputs`, `runs`) + confirm `railway dev` connects to
+Postgres locally.
