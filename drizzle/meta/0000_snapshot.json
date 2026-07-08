@@ -59,12 +59,8 @@
           "name": "attachments_saved_input_version_id_saved_input_versions_id_fk",
           "tableFrom": "attachments",
           "tableTo": "saved_input_versions",
-          "columnsFrom": [
-            "saved_input_version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["saved_input_version_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -118,12 +114,8 @@
           "name": "persona_versions_persona_id_personas_id_fk",
           "tableFrom": "persona_versions",
           "tableTo": "personas",
-          "columnsFrom": [
-            "persona_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["persona_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -171,12 +163,8 @@
           "name": "personas_project_id_projects_id_fk",
           "tableFrom": "personas",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -308,12 +296,8 @@
           "name": "runs_project_id_projects_id_fk",
           "tableFrom": "runs",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -321,12 +305,8 @@
           "name": "runs_persona_version_id_persona_versions_id_fk",
           "tableFrom": "runs",
           "tableTo": "persona_versions",
-          "columnsFrom": [
-            "persona_version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["persona_version_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -334,12 +314,8 @@
           "name": "runs_saved_input_version_id_saved_input_versions_id_fk",
           "tableFrom": "runs",
           "tableTo": "saved_input_versions",
-          "columnsFrom": [
-            "saved_input_version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["saved_input_version_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -393,12 +369,8 @@
           "name": "saved_input_versions_saved_input_id_saved_inputs_id_fk",
           "tableFrom": "saved_input_versions",
           "tableTo": "saved_inputs",
-          "columnsFrom": [
-            "saved_input_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["saved_input_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -446,12 +418,8 @@
           "name": "saved_inputs_project_id_projects_id_fk",
           "tableFrom": "saved_inputs",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -467,12 +435,7 @@
     "public.run_status": {
       "name": "run_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "running",
-        "success",
-        "error"
-      ]
+      "values": ["pending", "running", "success", "error"]
     }
   },
   "schemas": {},

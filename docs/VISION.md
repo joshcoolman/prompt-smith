@@ -34,7 +34,7 @@ a generated product photo. A standalone tool cannot replicate that
 context, and trying to (e.g. by teaching prompt-smith to render a palette
 preview) would turn it into a bad, permanently-lagging clone of every host
 app it might ever serve. The honest, containable slice a standalone tool
-*can* own is raw text/multimodal output, compared side by side, judged by
+_can_ own is raw text/multimodal output, compared side by side, judged by
 eye. Anything past that belongs in the host app, not here.
 
 **Projects** replace "app within an app" as the organizing unit. Each

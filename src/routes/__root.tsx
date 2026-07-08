@@ -4,6 +4,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import { appMeta } from '#/app-meta'
 import { ThemeToggle } from '#/components/theme-toggle'
+import { AuthProvider } from '#/features/auth'
 import appCss from '../styles/index.css?url'
 
 export const Route = createRootRoute({
@@ -52,7 +53,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <ThemeToggle />
         <TanStackDevtools
           config={{

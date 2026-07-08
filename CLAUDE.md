@@ -25,15 +25,19 @@ scope of what was asked) — routine milestone work doesn't need a check-in.
 - **Verifier:** two sources — the user's stated complaint (ground truth) and the standing `/knowledge` rubric (always-on baseline).
 - **Build the shallow depth first:** one-pass complaint-driven v1 (Phase 1). The verify loop (Phase 2) and optimizer (Phase 4) are downstream only.
 
-## Current state — Phase 0 shell complete, direction re-envisioned
+## Current state — infra + auth shipped, direction re-envisioned
 
-The Phase 0 runnable shell is still in place, but it was built for the old
-complaint-driven-fixer direction, now superseded by `docs/VISION.md`. No
-application code has changed to match the new direction yet — this is a
-docs-only re-envisioning pass.
+The Phase 0 runnable shell was built for the old complaint-driven-fixer
+direction, now superseded by `docs/VISION.md`. Since then, Phase 1 (Railway +
+Postgres + Drizzle) and Phase 1.5 (auth) have both shipped — see `docs/PLAN.md`.
 
-- **Shell:** empty home (`src/components/home.tsx`); in-app markdown docs viewer
-  at `/docs` (`src/routes/docs.tsx`, react-markdown). `pnpm dev` → :3002.
+- **Shell:** `/` is now the auth-gated dashboard (`src/routes/index.tsx`,
+  empty — first real feature lands here); `/login` is the sign-in form;
+  `/docs` stays public (`src/routes/docs.tsx`, react-markdown). `pnpm dev` →
+  :3002.
+- **Auth:** `src/features/auth/` — single shared-credential Supabase gate (see
+  its own `CLAUDE.md`). Setup: `pnpm setup:supabase` (never `pnpm setup` —
+  that's a pnpm built-in that installs the standalone binary).
 - **Rails (superseded):** feature seams under `src/features/` (`improve`,
   `generate`, `verify`, `knowledge`, `prefs`), each with a `CLAUDE.md` pointing
   at `docs/VISION.md` — they belonged to the old mechanism and are retired.
@@ -52,4 +56,4 @@ Token-based Tailwind utilities: `bg-surface`, `text-muted`, `font-serif`, etc.
 Feature styles never go in `src/styles/` — use Tailwind utilities in components
 or a co-located `features/<x>/<x>.module.css`.
 
-**Next:** Phase 1 — Railway + Postgres + Drizzle infra. See `docs/PLAN.md`.
+**Next:** Phase 2 — Effect AI provider layer. See `docs/PLAN.md`.

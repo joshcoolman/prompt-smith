@@ -54,7 +54,12 @@ function classify(path: string): Omit<Doc, 'content'> {
   const title = /^(README|CLAUDE)$/i.test(name)
     ? name
     : titleCase(name.replace(/-/g, ' '))
-  return { id: slugify([...segs, name].join('/')), section: sectionFor(path), title, order }
+  return {
+    id: slugify([...segs, name].join('/')),
+    section: sectionFor(path),
+    title,
+    order,
+  }
 }
 
 function buildDocs(): Doc[] {
@@ -154,7 +159,9 @@ function DocsPage() {
             >
               <Menu size={16} />
             </button>
-            <span className="text-text text-sm font-medium">{active.title}</span>
+            <span className="text-text text-sm font-medium">
+              {active.title}
+            </span>
           </div>
 
           <div className="prose compact">

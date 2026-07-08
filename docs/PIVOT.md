@@ -21,7 +21,7 @@ the live app. That coupling was premature; testing a prompt shouldn't be
 able to move what a real user sees.
 
 The reframe: prompt-smith isn't a public product to ship. It's the tool
-*behind* apps like palette-forge — a domain-agnostic prompt/persona
+_behind_ apps like palette-forge — a domain-agnostic prompt/persona
 workbench you drop into any project, build expertise inside, and either
 copy text out of directly (e.g. a finished Midjourney prompt) or hand off
 as a matured artifact to whatever app actually needs it. The public/BYO-key
@@ -80,7 +80,7 @@ host-app/                     ← host's own repo
   config, no shared state, no awareness in either direction.
 - `.gitignore`-ing the folder (not a git submodule) keeps the host repo
   from ever recording a commit-pin on prompt-smith — zero version coupling.
-- During local dev, a host feature *can* read a persona's blocks directly
+- During local dev, a host feature _can_ read a persona's blocks directly
   from the sibling folder (cheap glob import) — but that only works on your
   machine. Nothing under `prompt-smith/` exists in a deployed build, since
   it was never part of the host's git history.
@@ -113,7 +113,7 @@ host-app/                     ← host's own repo
   typed interface as the seam (not a folder convention), one file that
   knows the specifics, edit-don't-clobber on existing files, every step
   ending in a build-green gate, interactive/vendor steps hard-walled into
-  a separate script. Its `parts/knowledge.md` is also already the *read*
+  a separate script. Its `parts/knowledge.md` is also already the _read_
   half of this exact idea — a `knowledge/*.md` folder plus a ~15-line glob
   loader — one-sided (no authoring UI yet), which is the gap this project
   fills.

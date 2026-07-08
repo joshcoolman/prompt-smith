@@ -12,15 +12,16 @@ Prompt (or system prompt) + a **complaint** in → improved version out. "Too ve
 
 ## What it does NOT do (the boundary)
 
-Improves a prompt against a problem. Not a prompt library, not a chat playground, not a model benchmark suite. The lane is welded; retune *what good prompt-craft means* via `/knowledge`.
+Improves a prompt against a problem. Not a prompt library, not a chat playground, not a model benchmark suite. The lane is welded; retune _what good prompt-craft means_ via `/knowledge`.
 
 ## Why an agent is here (honest)
 
 The verifier comes from two sources, and both are honest:
+
 1. **Your complaint** — a rubric stated in plain language, anchored to a real defect you saw. "Too verbose" is a checkable standard.
 2. **The `/knowledge` folder** — the standing expertise about what a good prompt looks like in this domain, applied every run even when you don't complain.
 
-Loop: improve → check against the complaint *and* the knowledge rubric → revise until satisfied. The human-stated problem is the ground truth; the knowledge is the always-on baseline.
+Loop: improve → check against the complaint _and_ the knowledge rubric → revise until satisfied. The human-stated problem is the ground truth; the knowledge is the always-on baseline.
 
 ---
 
@@ -49,7 +50,7 @@ knowledge/
 ## Two depths (build the shallow one first)
 
 - **v1 — complaint-driven (ship this):** prompt + complaint in, improved prompt out, judged against the complaint + `/knowledge`. Small, immediately useful, you'd use it this week.
-- **Later — optimizer (the capstone):** the system prompt becomes the thing being *optimized* against a held-out test set; watch the prompt mutate and the score climb. Rung 7. Downstream, only if v1 earns it. Don't build it first.
+- **Later — optimizer (the capstone):** the system prompt becomes the thing being _optimized_ against a held-out test set; watch the prompt mutate and the score climb. Rung 7. Downstream, only if v1 earns it. Don't build it first.
 
 ## Notes for later
 

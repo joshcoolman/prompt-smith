@@ -8,8 +8,8 @@ rewriting a prompt. Edit this to tune the app for a specific domain or style.
 ## The core principle: concrete and specific beats abstract and general
 
 A good prompt gives the model a specific, visualizable target. Vague intent
-produces vague output. Every improvement should ask: *can a reader picture
-exactly what this is asking for?*
+produces vague output. Every improvement should ask: _can a reader picture
+exactly what this is asking for?_
 
 ## Structure
 
