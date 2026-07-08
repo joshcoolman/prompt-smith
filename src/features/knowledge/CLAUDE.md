@@ -1,3 +1,5 @@
+> Superseded — see docs/VISION.md. This feature seam belonged to the old complaint-driven-fixer mechanism and is retired under the new architecture. Kept as reference, not deleted.
+
 # feature: knowledge
 
 Loads `/knowledge/*.md` and exposes it to the rest of the app. The whole

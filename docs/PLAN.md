@@ -1,8 +1,13 @@
 # prompt-smith — build plan
 
-The concrete, phased build order. Read `SPEC.md` for the what/why; this is the
-how and the sequence. Each phase has a clear output — when the phase is done,
-that thing is runnable and testable.
+> **Rewritten (2026-07-07)** — see [`docs/VISION.md`](VISION.md) for the
+> what/why. This is the new phased build order. The original Phase 1–4
+> (complaint-driven fixer) are kept below as history, not deleted — they no
+> longer apply.
+
+The concrete, phased build order. Read `VISION.md` for the what/why; this is
+the how and the sequence. Each phase has a clear output — when the phase is
+done, that thing is runnable and testable.
 
 ---
 
@@ -20,6 +25,56 @@ Nothing functional yet — just the rails.
 - Docs: `OVERVIEW.md`, `SPEC.md`, `PLAN.md`, `STYLE.md`
 
 ---
+
+## Phase 1 — Infra: Railway + Postgres + Drizzle
+
+**Output:** Schema migrates, app boots, connects to Postgres via `railway dev`.
+
+**What to build:**
+
+1. Provision via `railway mcp install` + agent-driven setup: an app
+   service, a private-network Postgres (no public port), and an
+   attachment volume.
+2. Drizzle schema: `projects`, `personas` (versioned), `saved_inputs`
+   (+ attachments), `runs`.
+3. Confirm the app connects to Postgres locally through `railway dev` and
+   that migrations run cleanly.
+
+## Phase 2 — Effect AI provider layer
+
+**Output:** One working run, callable outside the UI (script/curl).
+
+**What to build:**
+
+1. Install `effect`, `@effect/ai`, `@effect/ai-anthropic`,
+   `@effect/ai-openai`, `@effect/schema`, `@effect/platform-node`.
+2. A backend endpoint: persona + input (text/image/PDF) + model choice →
+   raw output.
+3. Prove one real multimodal call end-to-end. API keys stay server-side
+   only — never in browser storage.
+
+## Phase 3 — Core UI: Projects, Personas, Inputs, single Run
+
+**Output:** The full single-run loop works in the browser.
+
+**What to build:**
+
+1. CRUD for Projects, Personas, and Saved Inputs.
+2. A run screen: persona × input × model → raw output.
+
+## Phase 4 — Side-by-side comparison
+
+**Output:** The actual target experience — same input run across multiple
+models and/or persona versions in parallel, shown side by side.
+
+## Phase 5 (later, if earned) — Golden-set bulk runs
+
+A saved input becomes a set; run a persona against the whole set in one
+action. Decide then whether it needs a queue or a second Railway service.
+
+---
+
+## Original phases 1–4 (superseded — see above and VISION.md) — kept as history
 
 ## Phase 1 — One-pass vertical (the v1)
 

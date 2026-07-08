@@ -1,5 +1,9 @@
 # prompt-smith — pivot (2026-07-03)
 
+> **Superseded (2026-07-07)** — see [`docs/VISION.md`](VISION.md) for the
+> current direction. This doc's delivery model and sequencing no longer
+> apply; kept as history, not deleted.
+
 > Supersedes the "complaint-driven prompt fixer" framing in `SPEC.md` and the
 > prompt-smith section of `OVERVIEW.md`. Those are left in place as history,
 > not deleted — this doc is the current direction. Reconcile them before
