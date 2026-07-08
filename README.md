@@ -60,11 +60,9 @@ skill. Single shared-credential Supabase gate — `/` is now the protected
 dashboard (redirects signed-out visitors to `/login?redirect=…` and back);
 `/docs` stays public. Vendor-agnostic `AuthClient` seam in
 `src/features/auth/` (Supabase is the only adapter; a mock adapter proves the
-contract in tests with zero env vars). Confirmed live: signed in locally
-against the real Supabase project, verified the redirect round-trip and a
-real "Invalid login credentials" response (not the unconfigured fallback).
-No signup UI — the one account is provisioned by hand in the Supabase
-dashboard, with public sign-ups disabled there as a mandatory security step.
+contract in tests with zero env vars). Confirmed live in production on
+Railway (env vars pushed, redeployed, signed in successfully) — not just
+locally.
 
 Also resolved: the Railway build blocker from `pnpm-workspace.yaml`'s dead
 `onlyBuiltDependencies` key (pnpm v11 renamed it `allowBuilds`), and
@@ -72,5 +70,17 @@ automatic DB migrations via Railway's Pre-Deploy Command
 (`pnpm db:migrate:deploy`, confirmed running before every deploy). Full
 detail in `gotchas/`.
 
-**Up next:** `docs/PLAN.md` Phase 2 — the Effect AI provider layer (server-side
-API keys, now safe to wire up behind the auth gate).
+**Up next:** `docs/PLAN.md` Phase 2 — the Effect AI provider layer (a backend
+endpoint: persona + input + model choice → raw output, provable via
+curl/script, no UI yet). Two decisions already settled, ready for a fresh
+session to build against without re-litigating:
+
+- **API keys live in Railway env vars** (e.g. `ANTHROPIC_API_KEY`), same
+  pattern as the Supabase keys — not a settings table. Revisit only if a
+  real need for in-app key rotation shows up.
+- **Anthropic is the first provider** (`@effect/ai-anthropic`) — prove one
+  real multimodal call end-to-end before adding a second adapter.
+
+Not yet researched: `@effect/ai`'s current API surface (the Effect
+ecosystem moves fast — verify against real docs, not memory, before
+writing the provider layer).
