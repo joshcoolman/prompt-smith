@@ -97,14 +97,37 @@ lands back where you were headed; a hard reload stays signed in.
    project). One gotcha found: `Prompt.FilePart.data` as a string is passed
    to Anthropic as-is — raw base64 only, a `data:` URL prefix breaks it.
 
-## Phase 3 — Core UI: Projects, Personas, Inputs, single Run
+## Phase 3 — Core UI: Projects, Personas, Inputs, single Run (complete)
 
 **Output:** The full single-run loop works in the browser.
 
-**What to build:**
+**What was built:**
 
-1. CRUD for Projects, Personas, and Saved Inputs.
-2. A run screen: persona × input × model → raw output.
+1. `src/features/projects/` — pure Drizzle CRUD (`createServerFn`) over
+   Project, Persona (+ versions), Saved Input (+ versions). Edits always
+   insert `max(version) + 1`, never overwrite.
+2. `src/features/runs/` — `createRun` (persona version + input version +
+   model → calls `#/features/ai`, persists a `runs` row with
+   success/error status), `listRuns`.
+3. `src/routes/index.tsx` (rewritten) — Projects list + create/delete.
+   `src/routes/projects.$projectId.tsx` (new) — one workspace page:
+   Personas panel, Saved Inputs panel, a Run panel (select persona
+   version × input version × model, run, see output inline), and run
+   history. No extra auth gate on the new server functions beyond the
+   app's existing client-side sign-in check — CRUD and the in-app run
+   path aren't cost-incurring the way `/api/run` is; that route stays as
+   the separate bearer-gated path for external/script use.
+4. **Scoped out this phase**: attachment upload (image/PDF) — Saved
+   Inputs are text-only for now; the `attachments` table stays unused
+   until a fast-follow.
+5. Proved end-to-end in the browser: created a project, a persona, a
+   saved input, ran it against the real Anthropic API (real output
+   persisted to history), edited the persona to create a v2, and
+   confirmed selecting v1 vs v2 in the Run panel actually changes the
+   model's output (v1 → "Paris.", v2 → "Paris est la capitale de la
+   France.") — versioning is real, not cosmetic. Local verification
+   needed its own Postgres (`docker-compose.yml`) since Railway's is
+   private-network-only — see `gotchas/local-postgres-for-dev.md`.
 
 ## Phase 4 — Side-by-side comparison
 
