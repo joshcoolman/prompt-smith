@@ -1,0 +1,15 @@
+# pnpm 11 reads build-script approvals from allowBuilds (onlyBuiltDependencies
+# was removed in v11 and is silently ignored if used here, or in a "pnpm" field
+# in package.json).
+#
+# Without these, `pnpm install` exits 1 with ERR_PNPM_IGNORED_BUILDS on a clean
+# machine — CI, or a Railway build. It passes locally, because a dev machine's
+# pnpm store usually has them approved already from another project. A green
+# local install is not evidence this is right; the next clean install is.
+#
+# sharp comes from Next, unrs-resolver from eslint. Both arrive with the base
+# scaffold, so this file is required from day one, not something a later
+# dependency introduces.
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
