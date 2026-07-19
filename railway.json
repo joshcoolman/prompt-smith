@@ -5,7 +5,7 @@
   },
   "deploy": {
     "startCommand": "pnpm start",
-    "preDeployCommand": [],
+    "preDeployCommand": ["echo 'no pre-deploy step until Phase 1 adds migrations'"],
     "restartPolicyType": "ALWAYS",
     "multiRegionConfig": {
       "us-west2": {
