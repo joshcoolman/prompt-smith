@@ -1,63 +1,63 @@
-# prompt-smith
+# Spec
 
-> A focused, BYO-key utility that improves a prompt (or system prompt) against a stated problem. Tuned for good prompt-craft out of the box — its expertise lives in `/knowledge` as plain markdown you can read and rewrite.
+## The welded boundary
 
-High-level sketch. Flesh out after palette-forge.
+A persona's quality can only be fully judged in the context that actually
+consumes it — a rendered palette, a moderated image, a generated product photo.
+A standalone tool cannot replicate that context, and trying to would turn it
+into a bad, permanently-lagging clone of every host app it might ever serve.
 
----
+The honest, containable slice a standalone tool **can** own is raw text and
+multimodal output, compared side by side. Anything past that belongs in the
+host app. This boundary is welded shut on purpose; re-opening it is how this
+project previously talked itself into a design it had to abandon.
 
-## The one thing it does
+## The data model — four nouns
 
-Prompt (or system prompt) + a **complaint** in → improved version out. "Too verbose, too many canned phrases, produces bland image results" → it fixes exactly that. Optionally run before/after across one or more models to see the difference.
+- **Project** — top-level container. Starts empty; everything belongs to
+  exactly one project.
+- **Persona** — a system prompt. Versioned: every edit inserts a new version,
+  never overwrites.
+- **Saved Input** — a user prompt plus optional attachments. Versioned
+  identically.
+- **Run** — one persona version × one saved input version × one model,
+  producing raw output.
 
-## What it does NOT do (the boundary)
+Versions are rows, not mutations. Runs pin `personaVersionId` and
+`savedInputVersionId` with `onDelete: restrict`, so a run can never end up
+pointing at a prompt that no longer says what it said when the run happened.
 
-Improves a prompt against a problem. Not a prompt library, not a chat playground, not a model benchmark suite. The lane is welded; retune _what good prompt-craft means_ via `/knowledge`.
+## Key design decisions
 
-## Why an agent is here (honest)
+**No Effect.** Model calls go through a thin `callModel(persona, input, model)`
+adapter this repo owns. The previous implementation used `@effect/ai`; it was
+adopted on reputation, not because a problem here demanded it. This app makes
+one API call and displays the result. Per-provider multimodal shaping — the one
+genuinely fiddly part — is a `switch` in one file, not a reason to adopt a
+runtime.
 
-The verifier comes from two sources, and both are honest:
+**API keys are server-side only.** Provider calls happen in server actions or
+route handlers. No key ever reaches the browser.
 
-1. **Your complaint** — a rubric stated in plain language, anchored to a real defect you saw. "Too verbose" is a checkable standard.
-2. **The `/knowledge` folder** — the standing expertise about what a good prompt looks like in this domain, applied every run even when you don't complain.
+**Comparison is by eye.** Side-by-side output is the product. No scoring layer
+sits between the operator and the raw text.
 
-Loop: improve → check against the complaint _and_ the knowledge rubric → revise until satisfied. The human-stated problem is the ground truth; the knowledge is the always-on baseline.
+## The auth boundary
 
----
+Auth is **allowlist-shaped**, self-hosted, and has no database:
 
-## The knowledge layer (the differentiator)
+- **No signup route.** Access is granted out-of-band by an operator adding an
+  entry to `AUTH_USERS` and redeploying. `pnpm auth:add-user` prints the entry.
+- **No password reset, no OAuth, no roles.** Everyone on the allowlist has
+  identical access. The app does not distinguish between them beyond an opaque
+  id derived from the email.
+- **No server-side revocation.** The session is a signed, stateless cookie —
+  there is no sessions table to delete a row from. Signing out clears the cookie
+  in that browser; a stolen cookie stays valid until it expires (30 days) or
+  until `AUTH_SESSION_SECRET` is changed, which invalidates every session at
+  once.
+- **Deny by default.** Every route requires a session except `/login`. That
+  includes `/docs`.
 
-**`/knowledge` is plain, human-readable markdown. Read it and you know what this app thinks a good prompt is. Edit it and the output changes.** Ships tuned for, say, image-generation prompt-craft. A copywriter or a prompt engineer in another domain forks it and rewrites it for theirs — by hand or via their own agent. No code required.
-
-Knowledge influences output in two places: it **guides the rewrite** and it **is part of the rubric the improvement is judged against**.
-
-Starter contents:
-
-```
-knowledge/
-├── prompt-craft.md    # what makes a good prompt here: concrete nouns, specificity,
-│                      # structure, what to keep vs cut
-├── anti-patterns.md   # the canned/generic phrases to strip (directly addresses the
-│                      # "bland, generic results" complaint) — a living blocklist
-└── rubric.md          # how to judge an improved prompt: did it fix the complaint,
-                       # is it tighter, did it avoid the anti-patterns
-```
-
-`anti-patterns.md` is the most fun one — it's a list you grow every time you spot a phrase that produces mush. The app literally gets better as you add to it, in readable markdown you can diff.
-
-**Deferred:** in-app knowledge-authoring mode. v2.
-
-## Two depths (build the shallow one first)
-
-- **v1 — complaint-driven (ship this):** prompt + complaint in, improved prompt out, judged against the complaint + `/knowledge`. Small, immediately useful, you'd use it this week.
-- **Later — optimizer (the capstone):** the system prompt becomes the thing being _optimized_ against a held-out test set; watch the prompt mutate and the score climb. Rung 7. Downstream, only if v1 earns it. Don't build it first.
-
-## Notes for later
-
-- BYO-key, browser-stored.
-- Clean addressable records for saved prompts (MCP-readiness).
-- Optimizer version: beware judge and optimizer being the same model class agreeing with each other — a held-out set protects against it.
-
-## Stack
-
-TanStack Start + React + TypeScript + Tailwind, Vercel. Same defaults.
+If this app ever needs real user accounts, that is the signal to adopt
+`better-auth` — not to extend this.

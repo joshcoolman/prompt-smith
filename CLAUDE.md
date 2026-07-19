@@ -1,59 +1,76 @@
-## Git workflow — milestone PRs (overrides global no-PR default)
+# prompt-smith
 
-This repo wants clean, milestone-based history: **branch → PR → merge**,
-not direct pushes to `main`. This overrides the global `~/.claude/CLAUDE.md`
-solo-dev "direct push" default for this repo specifically. One unit of
-work = one branch = one PR, merged when the unit is done (e.g. "Railway
-infra," "Drizzle schema"). Use `gh pr create` / `gh pr merge --delete-branch`.
+## What this app is
 
-Josh has explicitly authorized merging your own PRs without waiting for
-his review (2026-07-08) — he's directing at a distance and wants Claude
-to own the branch → PR → merge cycle end to end. Merge once the milestone
-is done and checks (build, tests) pass. Exception: pause and ask first if
-something about the PR gives genuine pause (failing build, a change that
-touches infra/secrets/destructive migrations, or anything outside the
-scope of what was asked) — routine milestone work doesn't need a check-in.
+A self-hosted, single-user multi-model prompt/persona playground.
 
-# prompt-smith — working notes for Claude
+**Project → Persona (versioned system prompt) × Saved Input (versioned user
+prompt + optional attachments) × Model → Run → raw output, compared side by
+side, judged by eye.**
 
-**Read first:** [`docs/VISION.md`](docs/VISION.md) — 2026-07-07 direction change, current authority. It supersedes `docs/PIVOT.md` (2026-07-03), which in turn supersedes the "Hold the line" section below and the framing in `docs/SPEC.md` / `docs/OVERVIEW.md`. The full chain is kept as history, not deleted. Reconcile before resuming work here.
+## Read first
 
-## Hold the line (superseded — see PIVOT.md)
+1. `docs/SPEC.md` — the data model and, more importantly, the **scope
+   boundary**. prompt-smith is not an evals platform, is not nested inside a
+   host app, and does not render domain-specific output. That boundary was
+   arrived at by rejecting a design that had already been built; do not
+   re-litigate it from scratch.
+2. `docs/PLAN.md` — build order and what is runnable at each phase.
+3. GitHub issues #16–#22 — the authoritative backlog detail.
 
-- **The boundary is welded.** Prompt + complaint in → improved prompt out. Not a prompt library, chat playground, or benchmark suite. Retune _what good prompt-craft means_ via `/knowledge` only.
-- **Mechanism vs knowledge.** The improve→verify→revise loop is mechanism (code). What "good" means lives in `/knowledge`: `prompt-craft.md`, `anti-patterns.md` (a living blocklist), `rubric.md`.
-- **Verifier:** two sources — the user's stated complaint (ground truth) and the standing `/knowledge` rubric (always-on baseline).
-- **Build the shallow depth first:** one-pass complaint-driven v1 (Phase 1). The verify loop (Phase 2) and optimizer (Phase 4) are downstream only.
+## Current phase
 
-## Current state — infra + auth shipped, direction re-envisioned
+**Phase 0 complete.** This is a fresh scaffold on the `bootstrap` Next.js
+starter, replacing a previous Vite + TanStack Start + Supabase implementation
+whose code still lives in git history on `main`.
 
-The Phase 0 runnable shell was built for the old complaint-driven-fixer
-direction, now superseded by `docs/VISION.md`. Since then, Phase 1 (Railway +
-Postgres + Drizzle) and Phase 1.5 (auth) have both shipped — see `docs/PLAN.md`.
+What exists: the shell, Paper & Ink styles, self-hosted allowlist auth,
+deny-by-default route protection, the `/docs` viewer, feature seams, CI.
+`/dashboard` is empty and is where Phase 1 gets built.
 
-- **Shell:** `/` is now the auth-gated dashboard (`src/routes/index.tsx`,
-  empty — first real feature lands here); `/login` is the sign-in form;
-  `/docs` stays public (`src/routes/docs.tsx`, react-markdown). `pnpm dev` →
-  :3002.
-- **Auth:** `src/features/auth/` — single shared-credential Supabase gate (see
-  its own `CLAUDE.md`). Setup: `pnpm setup:supabase` (never `pnpm setup` —
-  that's a pnpm built-in that installs the standalone binary).
-- **Rails (superseded):** feature seams under `src/features/` (`improve`,
-  `generate`, `verify`, `knowledge`, `prefs`), each with a `CLAUDE.md` pointing
-  at `docs/VISION.md` — they belonged to the old mechanism and are retired.
-  Core contracts in `src/features/improve/types.ts`: `PromptRecord`,
-  `PromptVerdict`, `PromptIssue` — left untouched, unused.
-- **Knowledge (historical):** `knowledge/prompt-craft.md`, `anti-patterns.md`,
-  `rubric.md` — see `docs/VISION.md`'s `/knowledge` folder note.
-- **Plan:** `docs/PLAN.md` has been rewritten with a new phased build order
-  (Railway + Postgres + Drizzle first); the old Phase 1-4 are kept below it
-  as history.
+What does not exist yet: any of the domain. No database, no schema, no provider
+call, no runs.
 
-## Style system
+## Stack decisions that are settled
 
-Paper & Ink global styles in **`src/styles/`** — see [`docs/STYLE.md`](docs/STYLE.md).
-Token-based Tailwind utilities: `bg-surface`, `text-muted`, `font-serif`, etc.
-Feature styles never go in `src/styles/` — use Tailwind utilities in components
-or a co-located `features/<x>/<x>.module.css`.
+- **Next.js App Router only.** No Vite.
+- **Self-hosted allowlist auth.** No Supabase — its free tier caps at two
+  projects, which is the constraint that started the rebuild.
+- **No Effect.** Model calls go through a thin `callModel` adapter this repo
+  owns. See issue #22 for the full reasoning, recorded so it is not re-adopted
+  on a vague recommendation.
 
-**Next:** Phase 2 — Effect AI provider layer. See `docs/PLAN.md`.
+## Layout
+
+```
+src/
+  app/         App Router tree — page, login, dashboard, docs
+  proxy.ts     deny-by-default middleware (Edge; imports auth/session directly)
+  features/
+    auth/      session, credentials, actions — see its CLAUDE.md
+    core/      the four nouns and orchestration — empty, Phase 1
+    knowledge/ server-only loader for knowledge/*.md
+    docs/      markdown classification for the /docs viewer
+  styles/      Paper & Ink — frozen baseline, treat as read-only
+knowledge/     plain markdown, tunable without touching code
+docs/          OVERVIEW / SPEC / PLAN / STYLE
+```
+
+## Conventions
+
+- pnpm, not npm.
+- No emoji anywhere — codebase, docs, or UI.
+- Feature styles never go in `src/styles/`. Use token-based Tailwind utilities,
+  or a co-located `*.module.css`.
+- `src/proxy.ts` must import `#/features/auth/session` directly, never the auth
+  barrel — the barrel pulls in `node:crypto` and breaks the Edge bundle.
+
+## Commands
+
+```
+pnpm dev                              # localhost:3040
+pnpm build                            # also the full type-check
+pnpm test
+pnpm lint
+pnpm auth:add-user '<email>' '<pw>'   # prints an AUTH_USERS entry
+```

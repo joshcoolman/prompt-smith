@@ -1,7 +1,0 @@
-# pnpm 11 reads build-script approvals from allowBuilds (onlyBuiltDependencies
-# was removed in v11 and is silently ignored if used here).
-allowBuilds:
-  unrs-resolver: true
-  esbuild: true
-  lightningcss: true
-  msgpackr-extract: true
