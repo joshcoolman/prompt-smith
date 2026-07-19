@@ -17,6 +17,9 @@ side, judged by eye.**
    re-litigate it from scratch.
 2. `docs/PLAN.md` — build order and what is runnable at each phase.
 3. GitHub issues #16–#22 — the authoritative backlog detail.
+4. `docs/DISCUSSIONS.md` — what has already been explained, and the queue of
+   open questions. Check its "Next up" before starting a discussion, and don't
+   re-explain anything under "Covered" unless asked.
 
 ## Current phase
 
@@ -64,6 +67,11 @@ docs/          OVERVIEW / SPEC / PLAN / STYLE
   or a co-located `*.module.css`.
 - `src/proxy.ts` must import `#/features/auth/session` directly, never the auth
   barrel — the barrel pulls in `node:crypto` and breaks the Edge bundle.
+- Keep `docs/DISCUSSIONS.md` current when a question gets answered: append a
+  recall-level note (two or three lines, closer to a definition than a
+  summary), then update "Next up" and "Open". Do it at natural beats without
+  asking, same as the README `## Status` block. In discussion mode, answer one
+  topic per turn and let the queue hold the rest.
 
 ## Commands
 
