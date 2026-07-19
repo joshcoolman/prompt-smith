@@ -1,15 +1,24 @@
+# This repo is a single package. The file exists only to carry allowBuilds,
+# which is the only place pnpm 11 reads build-script approvals from.
+#
+# `packages` is required even so. Once this file exists, pnpm treats the repo as
+# a workspace root, and versions before 11 abort with "packages field missing or
+# empty" — pnpm 11 tolerates its absence, which is exactly what makes it
+# dangerous: the local install passes and the deploy fails. Listing '.' keeps
+# the file valid across pnpm versions.
+packages:
+  - '.'
+
 # pnpm 11 reads build-script approvals from allowBuilds (onlyBuiltDependencies
-# was removed in v11 and is silently ignored if used here, or in a "pnpm" field
-# in package.json).
+# was removed in v11 and is silently ignored here, or in a "pnpm" field in
+# package.json).
 #
 # Without these, `pnpm install` exits 1 with ERR_PNPM_IGNORED_BUILDS on a clean
 # machine — CI, or a Railway build. It passes locally, because a dev machine's
-# pnpm store usually has them approved already from another project. A green
-# local install is not evidence this is right; the next clean install is.
+# pnpm store usually has them approved already from another project.
 #
 # sharp comes from Next, unrs-resolver from eslint. Both arrive with the base
-# scaffold, so this file is required from day one, not something a later
-# dependency introduces.
+# scaffold, so this file is required from day one.
 allowBuilds:
   sharp: true
   unrs-resolver: true
