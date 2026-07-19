@@ -79,15 +79,39 @@ this README and `CLAUDE.md`.
   and tests green with zero env vars.
 - `/dashboard` is intentionally empty — that is where the app gets built.
 
+- **Live in production** at
+  [prompt-smith-production.up.railway.app](https://prompt-smith-production.up.railway.app).
+  Railway rewired for Next.js: `railway.json` updated, `AUTH_SESSION_SECRET`
+  and `AUTH_USERS` set, the three Supabase vars deleted. Sign-in and route
+  gating verified on the live site, not just locally.
+
+**Deploy notes worth keeping**
+
+Five consecutive deploys failed before one succeeded, and none of the failures
+said what was wrong in an obvious place:
+
+- `pnpm-workspace.yaml` needs a `packages` field once it exists, or pnpm
+  versions before 11 abort. Local pnpm was 11 and Railway's was not, so the
+  install passed locally and failed on deploy. `packageManager` in
+  `package.json` now pins pnpm everywhere, which removes the class.
+- `railway.json` is an **override layer**, not a full description of the
+  service. Omitting `preDeployCommand` does not disable it, and neither does
+  setting it to `[]` — both read as "unset" and fall back to the last value.
+  Only a different, succeeding command replaces it, so it is a no-op `echo`
+  until Phase 1 restores migrations.
+- The Railway API returned **no build logs at all** for the early failures.
+  When a deploy fails with nothing useful from `railway logs` or the MCP, read
+  the deployment in the dashboard — the error was only ever visible there.
+
 **Up next**
 
 - Phase 1, the data model (#16): four nouns with append-only versioning. The
   previous implementation's `src/db/schema.ts` was verified working and is
   worth lifting close to verbatim from git history.
+- Restore a real `preDeployCommand` when migrations exist — see the reminder in
+  `docs/PLAN.md`, and turn on Postgres backups at the same time, since that is
+  the point where there is finally data worth losing.
 - Then the run loop (#18, #22), then side-by-side comparison (#19) — the actual
   point of the app, and the phase the previous implementation never reached.
-- Railway needs rewiring: drop the three Supabase vars, add
-  `AUTH_SESSION_SECRET` and `AUTH_USERS`, and update `railway.json`, which
-  still pins a Vite start command.
 
 See open issues #16–#22 for the backlog.
