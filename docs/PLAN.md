@@ -20,6 +20,12 @@ history on `main`, before the rebuild.
 **Runnable:** projects, personas, and saved inputs can be created and edited,
 with every edit producing a new version rather than overwriting.
 
+**Do not forget:** `railway.json` currently has **no** `preDeployCommand`. The
+pre-rebuild config ran `pnpm db:migrate:deploy` there, and it was dropped
+because no migrations exist yet — left in, it would fail every deploy. Restore
+it as part of this phase, or production will boot against a stale schema with
+nothing warning you.
+
 ## Phase 2 — Run loop (#18, #22)
 
 Pick a persona version × a saved input version × a model; call the provider
