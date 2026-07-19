@@ -49,20 +49,56 @@ Railway's Postgres is private-network-only (no public port), so it isn't
 reachable from a laptop — local dev needs its own disposable Postgres
 (`docker-compose.yml`). See `gotchas/local-postgres-for-dev.md`.
 
+Start Docker Desktop, then:
+
 ```bash
 pnpm install
-docker compose up -d   # local Postgres — make sure .env.local's DATABASE_URL
-                        # matches (postgresql://user:devpassword@localhost:5432/prompt_smith)
-node --env-file=.env.local scripts/migrate.mjs   # first time only
-pnpm dev      # http://localhost:3002
-pnpm build    # production build
-pnpm test     # vitest
+pnpm dev:local   # http://localhost:3002
+```
+
+`dev:local` is the whole loop in one command: brings up the Postgres
+container and waits for it to accept connections (`--wait`, backed by the
+healthcheck in `docker-compose.yml`), applies any pending migrations, then
+starts Vite. It's idempotent — safe to run every session, whether or not
+the container is already up or migrations are already applied.
+
+`.env.local`'s `DATABASE_URL` must match the container
+(`postgresql://user:devpassword@localhost:5432/prompt_smith`); `pnpm
+setup:supabase` writes the rest.
+
+```bash
+pnpm dev:local:stop   # stop the Postgres container (data survives in a volume)
+pnpm dev              # Vite only, if Postgres is already up
+pnpm db:migrate:local # migrations only
+pnpm build            # production build
+pnpm test             # vitest
 pnpm lint
 ```
 
+## Railway configuration
+
+Build and deploy settings live in `railway.json` (config-as-code), which
+takes precedence over the dashboard — so the pre-deploy migration step,
+start command, region, and replica count are versioned here rather than
+being invisible dashboard state. What deliberately stays in the dashboard:
+secrets (`ANTHROPIC_API_KEY`, the Supabase keys, `DATABASE_URL`'s service
+reference — see `.env.example` for the contract), the public domain, and
+the repo↔service link.
+
 ## Status
 
-**Last shipped:** Core UI (`docs/PLAN.md` Phase 3) — the full loop now works
+**Last shipped:** Local dev loop collapsed to one command, and Railway
+config pulled into the repo. `pnpm dev:local` now brings up Postgres
+(healthcheck + `--wait`), migrates, and starts Vite — replacing a
+four-step sequence whose migration step lived only in a gotcha file and
+failed as a confusing query error. `railway.json` versions the build and
+deploy settings that previously existed only in the dashboard — most
+importantly the pre-deploy `pnpm db:migrate:deploy`, which nothing in the
+repo recorded. Verified end to end: container healthy, migrations
+idempotent against the existing volume, app 200s on `/` and `/login`,
+10/10 tests, clean production build.
+
+**Before that:** Core UI (`docs/PLAN.md` Phase 3) — the full loop now works
 in the browser. `/` lists Projects (create/delete); `/projects/$projectId`
 is one workspace page with Personas, Saved Inputs (both versioned — every
 edit inserts a new version, never overwrites), and a Run panel that picks a

@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "vite dev --port 3002",
+    "dev:local": "docker compose up -d --wait && pnpm db:migrate:local && pnpm dev",
+    "dev:local:stop": "docker compose down",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
@@ -16,6 +18,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:deploy": "node scripts/migrate.mjs",
+    "db:migrate:local": "node --env-file=.env.local scripts/migrate.mjs",
     "db:studio": "drizzle-kit studio",
     "setup:supabase": "node scripts/setup.mjs",
     "lint": "eslint",
