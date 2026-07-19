@@ -5,6 +5,7 @@
   },
   "deploy": {
     "startCommand": "pnpm start",
+    "preDeployCommand": [],
     "restartPolicyType": "ALWAYS",
     "multiRegionConfig": {
       "us-west2": {
