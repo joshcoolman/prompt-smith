@@ -12,6 +12,18 @@ services:
       - '5432:5432'
     volumes:
       - prompt_smith_pg_data:/var/lib/postgresql/data
+    # Lets `docker compose up -d --wait` block until Postgres actually
+    # accepts connections, so `pnpm dev:local` can run migrations straight
+    # after without racing the container's startup.
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-prompt_smith}',
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 15
 
 volumes:
   prompt_smith_pg_data:
