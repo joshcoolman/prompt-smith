@@ -19,7 +19,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # pnpm 11.x requires Node >= 22.13; `scripts/migrate.mjs` and
+          # `db:migrate:local` also rely on `node --env-file`.
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
