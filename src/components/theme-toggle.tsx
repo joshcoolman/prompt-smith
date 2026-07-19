@@ -1,3 +1,5 @@
+'use client'
+
 import { Moon, Sun } from 'lucide-react'
 
 export function ThemeToggle() {
@@ -7,9 +9,7 @@ export function ThemeToggle() {
     root.setAttribute('data-theme', next)
     try {
       localStorage.setItem('site-theme', next)
-    } catch {
-      // ignore — private mode / storage disabled; theme still flips for the session
-    }
+    } catch {}
   }
 
   return (
@@ -17,8 +17,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label="Toggle light or dark theme"
-      title="Toggle theme"
-      className="border-border bg-surface text-text-muted hover:text-text hover:border-text-faint focus-visible:ring-accent fixed top-5 right-5 z-40 inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      className="border-border bg-surface text-text-muted hover:text-text fixed top-5 right-5 z-40 inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors"
     >
       <Moon size={16} className="dark:hidden" />
       <Sun size={16} className="hidden dark:block" />

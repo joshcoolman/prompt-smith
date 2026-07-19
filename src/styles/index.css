@@ -1,37 +1,10 @@
-/* ════════════════════════════════════════════════════════════════════════════
-   prompt-smith — global styles (entry point)
-
-   This folder IS the portable baseline. It is the whole visual identity
-   ("Paper & Ink"): the design tokens, the base element styling, and the
-   typographic roles. Nothing here is feature-specific, and feature styles must
-   never be added here — see docs/STYLE.md for the porting recipe and the rule.
-
-     tokens.css      the design contract — colors, fonts, scales (reskin here)
-     base.css        html/body element styling
-     typography.css  house-* roles + the .prose reading layer
-     index.css       this file — pulls in Tailwind + the partials + the bridge
-
-   @import rules must precede everything else (CSS spec), so they come first;
-   the Tailwind @theme bridge follows.
-   ════════════════════════════════════════════════════════════════════════════ */
-
 @import 'tailwindcss';
 @import './tokens.css';
 @import './base.css';
 @import './typography.css';
 
-/* Bind Tailwind's `dark:` variant to our data-theme mechanism (instead of the
-   default prefers-color-scheme), so `dark:` utilities follow the theme toggle.
-   Theme infrastructure, not feature styling — the tokens already auto-switch on
-   [data-theme], so this is only needed for the rare case of rendering different
-   markup per theme (e.g. the sun/moon icon swap in the theme toggle). */
 @custom-variant dark ([data-theme='dark'] &);
 
-/* ── Tailwind v4 token bridge ──────────────────────────────────────────────
-   Re-exposes the design tokens as Tailwind utilities. `inline` keeps them as
-   var() references, so the generated utilities (bg-surface, text-muted,
-   font-serif, …) follow the runtime [data-theme] switch instead of freezing a
-   value. Add a token in tokens.css and a matching line here to surface it. */
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);

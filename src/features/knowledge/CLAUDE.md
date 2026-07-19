@@ -1,26 +1,27 @@
-> Superseded — see docs/VISION.md. This feature seam belonged to the old complaint-driven-fixer mechanism and is retired under the new architecture. Kept as reference, not deleted.
+# Feature: knowledge
 
-# feature: knowledge
+## What this owns
 
-Loads `/knowledge/*.md` and exposes it to the rest of the app. The whole
-feature is ~15 lines.
+Reading `knowledge/*.md` from the repo root and handing the contents to
+whatever needs them, as a plain string. That is the entire responsibility.
 
-```ts
-const files = import.meta.glob('/knowledge/*.md', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-})
+## What it does NOT own
 
-export function getKnowledge(name: string): string {
-  const key = `/knowledge/${name}.md`
-  return (files[key] as string) ?? ''
-}
-```
+The content itself. Knowledge files are plain markdown, deliberately editable
+by a non-coder without touching code — the mechanism stays here, the taste
+stays in `knowledge/`.
 
-Call `getKnowledge('prompt-craft')`, `getKnowledge('anti-patterns')`,
-`getKnowledge('rubric')` to get the contents of the corresponding markdown
-file. Pass directly into prompts.
+## Key design decisions
 
-Knowledge files are plain markdown — a non-coder can read and rewrite them to
-tune the app's behavior without touching code. That's the point.
+- **Server-only, always.** This module imports `server-only`, so if any Client
+  Component ever imports it — even transitively — the build fails loudly with a
+  clear error instead of trying to ship `node:fs` into a browser bundle.
+  Anything downstream that reads knowledge must therefore live in a Server
+  Component, Route Handler, or Server Action, or receive the already-read string
+  as an argument from something that does.
+- **The universal provider.** Every feature may import from here. This is the
+  one exception to feature isolation.
+
+## Where to read more
+
+`docs/PLAN.md`.

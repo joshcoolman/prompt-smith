@@ -1,228 +1,60 @@
-# prompt-smith — build plan
+# Plan
 
-> **Rewritten (2026-07-07)** — see [`docs/VISION.md`](VISION.md) for the
-> what/why. This is the new phased build order. The original Phase 1–4
-> (complaint-driven fixer) are kept below as history, not deleted — they no
-> longer apply.
+Build order. Each phase names what is runnable when it is done. The backlog
+lives in GitHub issues; the issue numbers below are the authoritative detail.
 
-The concrete, phased build order. Read `VISION.md` for the what/why; this is
-the how and the sequence. Each phase has a clear output — when the phase is
-done, that thing is runnable and testable.
+## Phase 0 — Scaffold (done)
 
----
+Next.js App Router shell, Paper & Ink styles, self-hosted allowlist auth,
+deny-by-default route protection, `/docs` viewer, feature seams, CI.
 
-## Phase 0 — Runnable shell (complete)
+**Runnable:** the app boots, `/login` works, `/dashboard` is gated and empty.
 
-The scaffold is live. `pnpm dev` serves the app. The style system (Paper & Ink),
-the `/docs` viewer, the feature seams, and the knowledge files are all in place.
-Nothing functional yet — just the rails.
+## Phase 1 — Data model (#16)
 
-**What's in place:**
+Four nouns with append-only versioning: Project, Persona, Saved Input, Run.
+Postgres via Drizzle. The previous implementation's `src/db/schema.ts` was
+verified working and is worth lifting close to verbatim — find it in git
+history on `main`, before the rebuild.
 
-- Shell: `/docs` viewer at `src/routes/docs.tsx`
-- Style system: `src/styles/` (tokens, base, typography, index), theme toggle
-- Feature seams: `src/features/` — `improve`, `generate`, `verify`, `knowledge`, `prefs`
-- Knowledge: `knowledge/prompt-craft.md`, `anti-patterns.md`, `rubric.md`
-- Docs: `OVERVIEW.md`, `SPEC.md`, `PLAN.md`, `STYLE.md`
+**Runnable:** projects, personas, and saved inputs can be created and edited,
+with every edit producing a new version rather than overwriting.
 
----
+**Do not forget:** `railway.json` currently has **no** `preDeployCommand`. The
+pre-rebuild config ran `pnpm db:migrate:deploy` there, and it was dropped
+because no migrations exist yet — left in, it would fail every deploy. Restore
+it as part of this phase, or production will boot against a stale schema with
+nothing warning you.
 
-## Phase 1.5 — Auth (complete)
+## Phase 2 — Run loop (#18, #22)
 
-Single-user email/password sign-in gating the whole app (`/`) behind a
-vendor-agnostic seam, Supabase as the first adapter. Sequenced ahead of
-Phase 2 since that phase wires in server-side API keys, and the app was
-public with zero auth gate until this shipped.
+Pick a persona version × a saved input version × a model; call the provider
+server-side through a thin `callModel` adapter; persist the run with status
+(`pending` / `running` / `success` / `error`), output, and error; render the
+output as markdown.
 
-1. The feature's boundary doc and `types.ts` (the `AuthClient` contract)
-   first.
-2. Implement behind the feature's public `index.ts`: a lazy env-tolerant
-   Supabase adapter, an in-memory mock adapter, a React provider + `useAuth`.
-3. Test the contract via the mock adapter — no network, green without env
-   vars (CI has none).
-4. Gate `/` itself (not a separate `/dashboard` — the whole app is the
-   protected surface); mount the provider at the root. `/docs` stays public.
-5. `scripts/setup.mjs` (`pnpm setup:supabase`) — the user runs it: link or
-   create the hosted Supabase project, write `.env.local`, provision the
-   single user via the admin API. No signup UI exists.
+**Acceptance check, and it is the app justifying its own existence:** create a
+project, persona, and saved input; run it for real output; edit the persona to
+a v2; then confirm that picking v1 vs v2 in the run panel *changes the actual
+model output*.
 
-After this phase: visiting `/` signed-out redirects to `/login`; signing in
-lands back where you were headed; a hard reload stays signed in.
+## Phase 3 — Side-by-side comparison (#19)
 
----
+The actual point of the app, and the phase the previous implementation never
+reached. The same input run across multiple models and/or multiple persona
+versions, displayed next to each other.
 
-## Phase 1 — Infra: Railway + Postgres + Drizzle
+**Runnable:** two or more outputs held side by side, differences visible at a
+glance.
 
-**Output:** Schema migrates, app boots, connects to Postgres via `railway dev`.
+## Phase 4 — Multimodal attachments (#20)
 
-**What to build:**
+Image and PDF attachments on saved input **versions**, stored in object storage
+(Railway Bucket / S3 API), shaped per provider at call time.
 
-1. ✅ Provisioned via the Railway MCP + agent-driven setup: project
-   `prompt-smith`, an app service (deploys from GitHub `main`, public
-   domain https://prompt-smith-production.up.railway.app), a
-   private-network Postgres (no public port) with a volume mounted at
-   `/var/lib/postgresql/data`, and `DATABASE_URL` wired from Postgres to
-   the app service via reference variable. Fixed two deploy bugs found
-   along the way: missing `package.json` `start` script (Railpack fell
-   back to static-only serving instead of running the SSR server) and
-   `vite preview`'s default host allowlist blocking the Railway domain
-   (`vite.config.ts` `preview.allowedHosts`).
-2. Drizzle schema: `projects`, `personas` (versioned), `saved_inputs`
-   (+ attachments), `runs`.
-3. Confirm the app connects to Postgres locally through `railway dev` and
-   that migrations run cleanly.
+## Open questions (#21)
 
-## Phase 2 — Effect AI provider layer (complete)
-
-**Output:** One working run, callable outside the UI (script/curl).
-
-**What was built:**
-
-1. Installed `effect`, `@effect/platform` (for `FetchHttpClient` — lighter
-   than `@effect/platform-node`, which drags in `@effect/sql`/`@effect/cluster`
-   peers unused here), `@effect/ai`, `@effect/ai-anthropic`. `@effect/schema`
-   wasn't needed — `Schema` now lives in `effect` core. `@effect/ai-openai`
-   deferred until a second provider is actually added.
-2. `src/features/ai/` — the provider-agnostic `RunInput`/`RunOutput`
-   contract (`types.ts`) and the one file that knows `@effect/ai-anthropic`
-   (`anthropic-provider.ts`, server-only).
-3. `src/routes/api/run.ts` — a real POST endpoint (TanStack Start server
-   route), gated by a Supabase bearer token (the server-side counterpart to
-   the Phase 1.5 browser auth gate — this is a cost-incurring endpoint, not
-   safe to leave open once deployed).
-4. Proved end-to-end against the real Anthropic API: a text completion, an
-   image-description multimodal call (a real PNG, not a synthetic pixel —
-   Anthropic rejected a 1x1 test image), and the auth gate itself (missing
-   token → 401, invalid token → 401 verified against the live Supabase
-   project). One gotcha found: `Prompt.FilePart.data` as a string is passed
-   to Anthropic as-is — raw base64 only, a `data:` URL prefix breaks it.
-
-## Phase 3 — Core UI: Projects, Personas, Inputs, single Run (complete)
-
-**Output:** The full single-run loop works in the browser.
-
-**What was built:**
-
-1. `src/features/projects/` — pure Drizzle CRUD (`createServerFn`) over
-   Project, Persona (+ versions), Saved Input (+ versions). Edits always
-   insert `max(version) + 1`, never overwrite.
-2. `src/features/runs/` — `createRun` (persona version + input version +
-   model → calls `#/features/ai`, persists a `runs` row with
-   success/error status), `listRuns`.
-3. `src/routes/index.tsx` (rewritten) — Projects list + create/delete.
-   `src/routes/projects.$projectId.tsx` (new) — one workspace page:
-   Personas panel, Saved Inputs panel, a Run panel (select persona
-   version × input version × model, run, see output inline), and run
-   history. No extra auth gate on the new server functions beyond the
-   app's existing client-side sign-in check — CRUD and the in-app run
-   path aren't cost-incurring the way `/api/run` is; that route stays as
-   the separate bearer-gated path for external/script use.
-4. **Scoped out this phase**: attachment upload (image/PDF) — Saved
-   Inputs are text-only for now; the `attachments` table stays unused
-   until a fast-follow.
-5. Proved end-to-end in the browser: created a project, a persona, a
-   saved input, ran it against the real Anthropic API (real output
-   persisted to history), edited the persona to create a v2, and
-   confirmed selecting v1 vs v2 in the Run panel actually changes the
-   model's output (v1 → "Paris.", v2 → "Paris est la capitale de la
-   France.") — versioning is real, not cosmetic. Local verification
-   needed its own Postgres (`docker-compose.yml`) since Railway's is
-   private-network-only — see `gotchas/local-postgres-for-dev.md`.
-
-## Phase 4 — Side-by-side comparison
-
-**Output:** The actual target experience — same input run across multiple
-models and/or persona versions in parallel, shown side by side.
-
-## Phase 5 (later, if earned) — Golden-set bulk runs
-
-A saved input becomes a set; run a persona against the whole set in one
-action. Decide then whether it needs a queue or a second Railway service.
-
----
-
-## Original phases 1–4 (superseded — see above and VISION.md) — kept as history
-
-## Phase 1 — One-pass vertical (the v1)
-
-**Output:** Paste a prompt and a complaint, get an improved prompt back. One
-pass — no loop yet. This is the thing you'd actually use.
-
-**What to build:**
-
-1. **`src/features/knowledge/index.ts`** — the loader. `import.meta.glob` over
-   `knowledge/*.md`, expose `getKnowledge(name)`. ~15 lines.
-
-2. **`src/features/prefs/`** — BYO-key store. IndexedDB via a thin wrapper,
-   mirrored to a sync in-memory object so render decisions are synchronous.
-   Stores: API provider (Anthropic to start), BYO key, free-tier usage count.
-
-3. **`src/features/improve/`** — the core feature. Takes a `PromptRecord`
-   (prompt + complaint), calls `generate`, returns the improved prompt. Thin
-   orchestrator — holds no provider logic.
-
-4. **`src/features/generate/`** — the generation call. Assembles the system
-   prompt from `prompt-craft.md` and `anti-patterns.md`, sends the user's
-   prompt + complaint to the LLM, returns the improved version as a string.
-
-5. **UI** — replace the home placeholder with:
-   - Prompt input (textarea, large)
-   - Complaint input (textarea, smaller — "what's wrong with it?")
-   - Improve button
-   - Output panel showing the improved prompt + a diff or side-by-side view
-   - Key input panel (shown when no key is stored)
-
-**Provider:** Anthropic Claude (claude-sonnet-4-6 or haiku-4-5 for speed).
-Use `@anthropic-ai/sdk`. BYO-key, browser-side call only.
-
-**No verifier yet.** The output is just "here's the improved prompt." The verify
-loop comes in Phase 2.
-
----
-
-## Phase 2 — Verify loop
-
-**Output:** After generating, the agent checks its own work against the
-complaint and the rubric, and revises if it failed. Hard iteration cap (3 max).
-
-**What to build:**
-
-1. **`src/features/verify/`** — takes the original prompt, the complaint, the
-   improved prompt, and the rubric (`rubric.md`). Calls the LLM to judge whether
-   the improvement actually addressed the complaint. Returns a `PromptVerdict`
-   (pass/fail + specific failure modes from the rubric).
-
-2. **Revise loop** in `src/features/improve/` — if the verdict is `fail`, pass
-   the verdict's failure notes back to generate as additional constraints.
-   Repeat up to the cap.
-
-3. **UI** — show the verify loop in progress (iteration count, what the verifier
-   flagged). Show the final verdict alongside the output.
-
----
-
-## Phase 3 — Records and history
-
-**Output:** Improved prompts are saved as addressable records. You can browse
-past improvements.
-
-**What to build:**
-
-1. **`PromptRecord`** persistence — IndexedDB. Each record: ID, original prompt,
-   complaint, improved prompt, verdict, timestamp.
-
-2. **History UI** — a list of past records, click to load any of them.
-
-3. **MCP readiness** — records have stable IDs. No MCP server yet, but the data
-   shape is designed so one could be added in ~30 lines.
-
----
-
-## Phase 4 (later, if earned) — Optimizer
-
-The system prompt itself becomes the thing being optimized. You provide a
-held-out test set (prompt + expected output pairs), and the agent mutates the
-system prompt and watches the score climb. This is the evals/optimization rung —
-the capstone if v1 proves its worth.
-
-Do not build this first.
+Not blocking, recorded so they are not rediscovered from scratch: is a compiled
+persona one concatenated string or separate message roles; do golden-set bulk
+runs need a queue; are composable persona blocks worth it for ablation, or does
+version history already cover enough.

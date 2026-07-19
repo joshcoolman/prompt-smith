@@ -1,24 +1,34 @@
-# feature: auth
+# Feature: auth
 
-Single-user email/password login gating the whole app. Not multi-user auth —
-any account that exists in the linked Supabase project gets identical
-access, because the app never checks *which* user is signed in.
+## What this owns
 
-- **Owns**: the `AuthClient` contract (`types.ts`); the Supabase adapter
-  (`supabase-adapter.ts` — lazy, env-tolerant, the only file that knows
-  Supabase); the React surface (`AuthProvider` + `useAuth`); the mock
-  adapter (`mock-adapter.ts`, test double, not exported from `index.ts`).
-- **Does NOT own**: route guarding (`src/routes/index.tsx`'s `beforeLoad`
-  calls `getAuthClient().getSession()` itself); user provisioning
-  (`scripts/setup.mjs`, run via `pnpm setup:supabase`); styling.
-- **Key decisions**: consumers import only `index.ts`; the vendor appears in
-  exactly one file — a second vendor is a second adapter, nothing else
-  changes; errors cross the contract as plain strings, not vendor error
-  objects; the once-per-load stale-session verification (`getSession()`
-  re-checks with the server once, then trusts localStorage); never `await`
-  another auth call inside `onAuthStateChange` — supabase-js holds a lock
-  while dispatching and deadlocks.
-- **No signup UI, no password reset, no OAuth, no roles.** The one account
-  is provisioned server-side by the setup wizard's admin-API call.
+The whole sign-in boundary: password verification, the session cookie, and the
+`getCurrentUserId()` backstop. No auth service, no database, no signup route.
 
-Read more: `docs/PLAN.md` (build order), `gotchas/` (deploy-time lessons).
+## What it does NOT own
+
+Route gating lives in `src/proxy.ts` (Edge middleware). Anything about *who a
+user is* beyond an opaque id — profiles, roles, preferences — belongs to
+another feature.
+
+## Key design decisions
+
+- **Allowlist, not accounts.** `AUTH_USERS` is a comma-separated list of
+  `email:salt:hash`. Access is granted out-of-band with `pnpm auth:add-user`
+  and a redeploy. There is no signup, no reset, no OAuth, no roles. If this app
+  ever needs real user accounts, that is the signal to adopt `better-auth` —
+  not to extend this.
+- **Edge/Node split is structural.** `session.ts` is Web Crypto only and is what
+  `proxy.ts` imports directly. `credentials.ts` uses `node:crypto`. The barrel
+  (`index.ts`) re-exports both and must never be imported by middleware.
+- **Dot-free user ids.** The cookie is `userId.issuedAtMs.signature`, split on
+  `.`, so the id is a sha256 prefix of the email, never the email itself.
+- **Stateless sessions.** No sessions table, so no server-side revocation. Sign
+  out clears the cookie on that browser; a stolen cookie stays valid until it
+  expires or `AUTH_SESSION_SECRET` changes.
+- **`getCurrentUserId()` throws** rather than returning null, so data access can
+  never silently proceed unauthenticated when a caller forgets to check.
+
+## Where to read more
+
+`docs/SPEC.md` (the auth boundary), `docs/PLAN.md` (build order).
